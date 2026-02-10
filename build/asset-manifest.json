@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/bright-de-ai-assistant/static/css/main.d45b1dac.css",
+    "main.js": "/bright-de-ai-assistant/static/js/main.d920ffac.js",
+    "index.html": "/bright-de-ai-assistant/index.html",
+    "main.d45b1dac.css.map": "/bright-de-ai-assistant/static/css/main.d45b1dac.css.map",
+    "main.d920ffac.js.map": "/bright-de-ai-assistant/static/js/main.d920ffac.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d45b1dac.css",
+    "static/js/main.d920ffac.js"
+  ]
+}

@@ -1,0 +1,549 @@
+class StorageService {
+  constructor() {
+    this.PROGRESS_KEY = 'de_assistant_progress';
+    this.BOOKMARKS_KEY = 'de_assistant_bookmarks';
+    this.SETTINGS_KEY = 'de_assistant_settings';
+  }
+
+  // Initialize default progress data
+  getDefaultProgress() {
+    return {
+      termsMastered: [],
+      coursesProgress: {},
+      videosWatched: [],
+      quizzesTaken: [],
+      streak: 0,
+      lastActive: null,
+      achievements: []
+    };
+  }
+
+  // Initialize default bookmarks
+  getDefaultBookmarks() {
+    return [];
+  }
+
+  // Initialize default settings
+  getDefaultSettings() {
+    return {
+      theme: 'light',
+      notifications: true,
+      autoPlayVideos: false,
+      difficulty: 'beginner',
+      dailyGoal: 5
+    };
+  }
+
+  // Progress tracking
+  saveProgress(progressData) {
+    try {
+      localStorage.setItem(this.PROGRESS_KEY, JSON.stringify(progressData));
+      return true;
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      return false;
+    }
+  }
+
+  loadProgress() {
+    try {
+      const data = localStorage.getItem(this.PROGRESS_KEY);
+      return data ? JSON.parse(data) : this.getDefaultProgress();
+    } catch (error) {
+      console.error('Error loading progress:', error);
+      return this.getDefaultProgress();
+    }
+  }
+
+  // Bookmarks
+  saveBookmarks(bookmarks) {
+    try {
+      localStorage.setItem(this.BOOKMARKS_KEY, JSON.stringify(bookmarks));
+      return true;
+    } catch (error) {
+      console.error('Error saving bookmarks:', error);
+      return false;
+    }
+  }
+
+  loadBookmarks() {
+    try {
+      const data = localStorage.getItem(this.BOOKMARKS_KEY);
+      return data ? JSON.parse(data) : this.getDefaultBookmarks();
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+      return this.getDefaultBookmarks();
+    }
+  }
+
+  // Add bookmark
+  addBookmark(item) {
+    try {
+      const bookmarks = this.loadBookmarks();
+      
+      // Check if already bookmarked
+      const isAlreadyBookmarked = bookmarks.some(
+        b => b.id === item.id && b.type === item.type
+      );
+      
+      if (!isAlreadyBookmarked) {
+        bookmarks.push({
+          ...item,
+          bookmarkedAt: new Date().toISOString()
+        });
+        this.saveBookmarks(bookmarks);
+        return { success: true, message: 'Bookmark added!' };
+      }
+      return { success: false, message: 'Already bookmarked' };
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
+      return { success: false, message: 'Error adding bookmark' };
+    }
+  }
+
+  // Remove bookmark
+  removeBookmark(itemId, itemType) {
+    try {
+      const bookmarks = this.loadBookmarks();
+      const initialLength = bookmarks.length;
+      
+      const filteredBookmarks = bookmarks.filter(
+        b => !(b.id === itemId && b.type === itemType)
+      );
+      
+      if (filteredBookmarks.length !== initialLength) {
+        this.saveBookmarks(filteredBookmarks);
+        return { success: true, message: 'Bookmark removed!' };
+      }
+      return { success: false, message: 'Bookmark not found' };
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
+      return { success: false, message: 'Error removing bookmark' };
+    }
+  }
+
+  // Check if item is bookmarked
+  isBookmarked(itemId, itemType) {
+    try {
+      const bookmarks = this.loadBookmarks();
+      return bookmarks.some(b => b.id === itemId && b.type === itemType);
+    } catch (error) {
+      console.error('Error checking bookmark:', error);
+      return false;
+    }
+  }
+
+  // Course progress
+  updateCourseProgress(courseId, progress) {
+    try {
+      const progressData = this.loadProgress();
+      progressData.coursesProgress = progressData.coursesProgress || {};
+      progressData.coursesProgress[courseId] = Math.min(100, Math.max(0, progress));
+      this.saveProgress(progressData);
+      return true;
+    } catch (error) {
+      console.error('Error updating course progress:', error);
+      return false;
+    }
+  }
+
+  getCourseProgress(courseId) {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.coursesProgress?.[courseId] || 0;
+    } catch (error) {
+      console.error('Error getting course progress:', error);
+      return 0;
+    }
+  }
+
+  // Term mastery
+  updateTermMastery(termId, mastered) {
+    try {
+      const progressData = this.loadProgress();
+      progressData.termsMastered = progressData.termsMastered || [];
+      
+      if (mastered) {
+        // Add if not already there
+        if (!progressData.termsMastered.includes(termId)) {
+          progressData.termsMastered.push(termId);
+        }
+      } else {
+        // Remove if exists
+        progressData.termsMastered = progressData.termsMastered.filter(id => id !== termId);
+      }
+      
+      this.saveProgress(progressData);
+      return true;
+    } catch (error) {
+      console.error('Error updating term mastery:', error);
+      return false;
+    }
+  }
+
+  isTermMastered(termId) {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.termsMastered?.includes(termId) || false;
+    } catch (error) {
+      console.error('Error checking term mastery:', error);
+      return false;
+    }
+  }
+
+  // Video watching
+  markVideoWatched(videoId) {
+    try {
+      const progressData = this.loadProgress();
+      progressData.videosWatched = progressData.videosWatched || [];
+      
+      if (!progressData.videosWatched.includes(videoId)) {
+        progressData.videosWatched.push(videoId);
+        this.saveProgress(progressData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error marking video as watched:', error);
+      return false;
+    }
+  }
+
+  isVideoWatched(videoId) {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.videosWatched?.includes(videoId) || false;
+    } catch (error) {
+      console.error('Error checking video watched:', error);
+      return false;
+    }
+  }
+
+  // Quiz results
+  saveQuizResult(quizData) {
+    try {
+      const progressData = this.loadProgress();
+      progressData.quizzesTaken = progressData.quizzesTaken || [];
+      
+      progressData.quizzesTaken.push({
+        ...quizData,
+        takenAt: new Date().toISOString(),
+        id: Date.now().toString() // Unique ID
+      });
+      
+      this.saveProgress(progressData);
+      return true;
+    } catch (error) {
+      console.error('Error saving quiz result:', error);
+      return false;
+    }
+  }
+
+  getQuizResults() {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.quizzesTaken || [];
+    } catch (error) {
+      console.error('Error getting quiz results:', error);
+      return [];
+    }
+  }
+
+  // Streak tracking
+  updateStreak() {
+    try {
+      const progressData = this.loadProgress();
+      const today = new Date().toDateString();
+      const lastActive = progressData.lastActive ? 
+        new Date(progressData.lastActive).toDateString() : null;
+      
+      if (lastActive === today) {
+        return progressData.streak;
+      }
+      
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toDateString();
+      
+      if (lastActive === yesterdayStr) {
+        progressData.streak += 1;
+      } else {
+        progressData.streak = 1;
+      }
+      
+      progressData.lastActive = new Date().toISOString();
+      this.saveProgress(progressData);
+      
+      return progressData.streak;
+    } catch (error) {
+      console.error('Error updating streak:', error);
+      return 0;
+    }
+  }
+
+  getStreak() {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.streak || 0;
+    } catch (error) {
+      console.error('Error getting streak:', error);
+      return 0;
+    }
+  }
+
+  // Achievements
+  addAchievement(achievementId, achievementName) {
+    try {
+      const progressData = this.loadProgress();
+      progressData.achievements = progressData.achievements || [];
+      
+      if (!progressData.achievements.some(a => a.id === achievementId)) {
+        progressData.achievements.push({
+          id: achievementId,
+          name: achievementName,
+          earnedAt: new Date().toISOString()
+        });
+        this.saveProgress(progressData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding achievement:', error);
+      return false;
+    }
+  }
+
+  getAchievements() {
+    try {
+      const progressData = this.loadProgress();
+      return progressData.achievements || [];
+    } catch (error) {
+      console.error('Error getting achievements:', error);
+      return [];
+    }
+  }
+
+  // Settings
+  saveSettings(settings) {
+    try {
+      localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
+      return true;
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      return false;
+    }
+  }
+
+  loadSettings() {
+    try {
+      const data = localStorage.getItem(this.SETTINGS_KEY);
+      return data ? JSON.parse(data) : this.getDefaultSettings();
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      return this.getDefaultSettings();
+    }
+  }
+
+  updateSetting(key, value) {
+    try {
+      const settings = this.loadSettings();
+      settings[key] = value;
+      this.saveSettings(settings);
+      return true;
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      return false;
+    }
+  }
+
+  // Statistics
+  getStatistics() {
+    try {
+      const progressData = this.loadProgress();
+      const bookmarks = this.loadBookmarks();
+      
+      return {
+        totalTermsMastered: progressData.termsMastered?.length || 0,
+        totalCoursesEnrolled: Object.keys(progressData.coursesProgress || {}).length,
+        totalVideosWatched: progressData.videosWatched?.length || 0,
+        totalQuizzesTaken: progressData.quizzesTaken?.length || 0,
+        totalBookmarks: bookmarks.length || 0,
+        currentStreak: progressData.streak || 0,
+        totalAchievements: progressData.achievements?.length || 0,
+        lastActive: progressData.lastActive || 'Never'
+      };
+    } catch (error) {
+      console.error('Error getting statistics:', error);
+      return {
+        totalTermsMastered: 0,
+        totalCoursesEnrolled: 0,
+        totalVideosWatched: 0,
+        totalQuizzesTaken: 0,
+        totalBookmarks: 0,
+        currentStreak: 0,
+        totalAchievements: 0,
+        lastActive: 'Never'
+      };
+    }
+  }
+
+  // Reset all data
+  resetAllData() {
+    try {
+      localStorage.removeItem(this.PROGRESS_KEY);
+      localStorage.removeItem(this.BOOKMARKS_KEY);
+      localStorage.removeItem(this.SETTINGS_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error resetting data:', error);
+      return false;
+    }
+  }
+
+  // Export data
+  exportData() {
+    try {
+      const data = {
+        progress: this.loadProgress(),
+        bookmarks: this.loadBookmarks(),
+        settings: this.loadSettings(),
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0'
+      };
+      return {
+        success: true,
+        data: JSON.stringify(data, null, 2),
+        filename: `de-assistant-backup-${new Date().toISOString().split('T')[0]}.json`
+      };
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Import data
+  importData(jsonString) {
+    try {
+      const data = JSON.parse(jsonString);
+      
+      if (data.progress) this.saveProgress(data.progress);
+      if (data.bookmarks) this.saveBookmarks(data.bookmarks);
+      if (data.settings) this.saveSettings(data.settings);
+      
+      return { 
+        success: true, 
+        message: 'Data imported successfully!' 
+      };
+    } catch (error) {
+      console.error('Error importing data:', error);
+      return { 
+        success: false, 
+        error: 'Invalid data format or corrupted file' 
+      };
+    }
+  }
+
+  // Check if user has data
+  hasData() {
+    try {
+      return localStorage.getItem(this.PROGRESS_KEY) !== null ||
+             localStorage.getItem(this.BOOKMARKS_KEY) !== null ||
+             localStorage.getItem(this.SETTINGS_KEY) !== null;
+    } catch (error) {
+      console.error('Error checking data:', error);
+      return false;
+    }
+  }
+
+  // Get all progress for dashboard
+  getDashboardData() {
+    try {
+      const stats = this.getStatistics();
+      const progressData = this.loadProgress();
+      
+      return {
+        stats,
+        recentActivity: this.getRecentActivity(),
+        learningGoals: this.getLearningGoals(),
+        progressData
+      };
+    } catch (error) {
+      console.error('Error getting dashboard data:', error);
+      return {
+        stats: this.getStatistics(),
+        recentActivity: [],
+        learningGoals: {},
+        progressData: this.getDefaultProgress()
+      };
+    }
+  }
+
+  // Get recent activity
+  getRecentActivity() {
+    try {
+      const progressData = this.loadProgress();
+      const activities = [];
+      
+      // Add recent quizzes
+      const recentQuizzes = progressData.quizzesTaken?.slice(-3).reverse() || [];
+      recentQuizzes.forEach(quiz => {
+        activities.push({
+          type: 'quiz',
+          title: quiz.name || 'Quiz',
+          score: quiz.score,
+          time: quiz.takenAt,
+          message: `Scored ${quiz.score}% on ${quiz.name || 'a quiz'}`
+        });
+      });
+      
+      // Add recently mastered terms
+      if (progressData.termsMastered?.length > 0) {
+        const recentTerms = progressData.termsMastered.slice(-2);
+        activities.push({
+          type: 'term',
+          title: 'Terms Mastered',
+          count: recentTerms.length,
+          time: new Date().toISOString(),
+          message: `Mastered ${recentTerms.length} new terms`
+        });
+      }
+      
+      // Sort by time (newest first)
+      return activities.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
+    } catch (error) {
+      console.error('Error getting recent activity:', error);
+      return [];
+    }
+  }
+
+  // Learning goals
+  getLearningGoals() {
+    try {
+      const progressData = this.loadProgress();
+      const settings = this.loadSettings();
+      
+      const masteredTerms = progressData.termsMastered?.length || 0;
+      const watchedVideos = progressData.videosWatched?.length || 0;
+      const takenQuizzes = progressData.quizzesTaken?.length || 0;
+      
+      return {
+        dailyGoal: settings.dailyGoal || 5,
+        currentTermsToday: 0, // Would track daily terms in a real app
+        termsGoal: Math.max(50, masteredTerms + 10),
+        videosGoal: Math.max(20, watchedVideos + 5),
+        quizzesGoal: Math.max(10, takenQuizzes + 3)
+      };
+    } catch (error) {
+      console.error('Error getting learning goals:', error);
+      return {
+        dailyGoal: 5,
+        currentTermsToday: 0,
+        termsGoal: 50,
+        videosGoal: 20,
+        quizzesGoal: 10
+      };
+    }
+  }
+}
+
+export default new StorageService();

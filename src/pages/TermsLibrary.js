@@ -1,0 +1,124 @@
+import React, { useState, useEffect } from 'react';
+import TermCard from '../components/TermCard';
+import { dataEngineeringTerms } from '../data/termsData';
+import '../styles/components.css';
+
+const TermsLibrary = () => {
+  const [terms] = useState(dataEngineeringTerms);
+  const [filteredTerms, setFilteredTerms] = useState(terms);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+
+  const categories = ['All', ...new Set(terms.map(term => term.category))];
+  const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+
+  useEffect(() => {
+    let result = terms;
+    
+    if (searchQuery) {
+      result = result.filter(term =>
+        term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        term.definition.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (selectedCategory !== 'All') {
+      result = result.filter(term => term.category === selectedCategory);
+    }
+    
+    if (selectedDifficulty !== 'All') {
+      result = result.filter(term => term.difficulty === selectedDifficulty);
+    }
+    
+    setFilteredTerms(result);
+  }, [searchQuery, selectedCategory, selectedDifficulty, terms]);
+
+  return (
+    <div className="terms-library">
+      <div className="library-header">
+        <h2>Data Engineering Terms Library</h2>
+        <p>Explore {terms.length} key concepts with detailed explanations</p>
+      </div>
+      
+      <div className="filter-section">
+        <div className="search-filter">
+          <input
+            type="text"
+            placeholder="Search terms..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        
+        <div className="filter-controls">
+          <div className="filter-group">
+            <label>Category:</label>
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="filter-select"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Difficulty:</label>
+            <select 
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="filter-select"
+            >
+              {difficulties.map(difficulty => (
+                <option key={difficulty} value={difficulty}>{difficulty}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div className="terms-stats">
+        <div className="stat-card">
+          <span className="stat-number">{filteredTerms.length}</span>
+          <span className="stat-label">Terms Found</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-number">
+            {terms.filter(t => t.difficulty === 'Beginner').length}
+          </span>
+          <span className="stat-label">Beginner</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-number">
+            {terms.filter(t => t.difficulty === 'Intermediate').length}
+          </span>
+          <span className="stat-label">Intermediate</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-number">
+            {terms.filter(t => t.difficulty === 'Advanced').length}
+          </span>
+          <span className="stat-label">Advanced</span>
+        </div>
+      </div>
+      
+      <div className="terms-grid">
+        {filteredTerms.length > 0 ? (
+          filteredTerms.map(term => (
+            <TermCard key={term.id} term={term} />
+          ))
+        ) : (
+          <div className="no-results">
+            <p>No terms found matching your criteria.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TermsLibrary;
