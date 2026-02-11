@@ -1,11 +1,82 @@
 :root {
-  --primary-blue: #4361ee;
-  --secondary-purple: #7209b7;
-  --accent-orange: #f8961e;
-  --accent-green: #4cc9f0;
-  --bright-yellow: #ffd166;
-  --light-bg: #f8f9fa;
-  --dark-text: #212529;
-  --card-bg: #ffffff;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Rainbow Colors */
+  --rainbow-red: #ff6b6b;
+  --rainbow-orange: #ff9e6d;
+  --rainbow-yellow: #ffd93d;
+  --rainbow-green: #6bcf7f;
+  --rainbow-blue: #4d96ff;
+  --rainbow-indigo: #6c5ce7;
+  --rainbow-violet: #a367dc;
+  --rainbow-pink: #ff8b8b;
+  
+  /* Gradients */
+  --gradient-rainbow: linear-gradient(135deg, 
+    #ff6b6b 0%, 
+    #ff9e6d 15%, 
+    #ffd93d 30%, 
+    #6bcf7f 45%, 
+    #4d96ff 60%, 
+    #6c5ce7 75%, 
+    #a367dc 90%);
+  
+  --gradient-sunset: linear-gradient(135deg, #ff6b6b 0%, #ff9e6d 100%);
+  --gradient-ocean: linear-gradient(135deg, #4d96ff 0%, #6c5ce7 100%);
+  --gradient-forest: linear-gradient(135deg, #6bcf7f 0%, #4d96ff 100%);
+  --gradient-lavender: linear-gradient(135deg, #a367dc 0%, #6c5ce7 100%);
+  
+  /* UI Colors */
+  --bg-light: linear-gradient(135deg, #fff9f0 0%, #fff0f0 100%);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --text-dark: #2d3436;
+  --text-light: #636e72;
+  --shadow: 0 10px 30px rgba(255, 107, 107, 0.15);
+  --shadow-rainbow: 0 10px 30px rgba(255, 107, 107, 0.2);
+}
+
+/* Rainbow Text Effects */
+.rainbow-text {
+  background: var(--gradient-rainbow);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+.rainbow-bg {
+  background: var(--bg-light);
+}
+
+.rainbow-gradient {
+  background: var(--gradient-rainbow);
+  color: white;
+}
+
+.rainbow-card {
+  border: none;
+  border-radius: 20px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-rainbow);
+  transition: all 0.3s ease;
+}
+
+.rainbow-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+}
+
+/* Rainbow Button Variants */
+.rainbow-btn-1 { background: var(--rainbow-red); }
+.rainbow-btn-2 { background: var(--rainbow-orange); }
+.rainbow-btn-3 { background: var(--rainbow-yellow); color: black; }
+.rainbow-btn-4 { background: var(--rainbow-green); }
+.rainbow-btn-5 { background: var(--rainbow-blue); }
+.rainbow-btn-6 { background: var(--rainbow-indigo); }
+.rainbow-btn-7 { background: var(--rainbow-violet); }
+
+/* Rainbow Borders */
+.rainbow-border {
+  border: 3px solid transparent;
+  border-image: var(--gradient-rainbow);
+  border-image-slice: 1;
+  border-radius: 15px;
 }

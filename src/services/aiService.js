@@ -1,130 +1,150 @@
-// Enhanced AI Service with actual functionality
 class AIService {
   constructor() {
-    this.mockTermsDatabase = {
-      'ETL': {
-        explanation: `ETL stands for Extract, Transform, Load. It's a data integration process that combines data from multiple sources into a single, consistent data store that is loaded into a data warehouse or other target system.`,
-        howToUse: 'Use ETL when migrating data between systems, creating data pipelines, or preparing data for analytics. Tools include Apache Airflow, Talend, Informatica, or custom Python/R scripts.',
-        whenToUse: 'When you need to move data from transactional databases to data warehouses, synchronize data across systems, or clean and prepare data for analysis.',
-        examples: [
-          'Extracting sales data from multiple databases',
-          'Transforming date formats and cleaning missing values',
-          'Loading processed data into a data warehouse for reporting'
-        ]
+    this.termDatabase = {
+      'etl': {
+        explanation: "ETL (Extract, Transform, Load) is a data integration process that combines data from multiple sources into a single, consistent data store.",
+        howToUse: "Use Python with pandas, Apache Airflow, or Talend. Create extraction scripts, transformation logic, and loading procedures.",
+        whenToUse: "When moving data from operational databases to data warehouses, or preparing data for analytics.",
+        examples: ["Extracting sales data from PostgreSQL", "Transforming JSON to CSV format", "Loading cleaned data to Redshift"]
       },
-      'Data Lake': {
-        explanation: `A Data Lake is a centralized repository that allows you to store all your structured and unstructured data at any scale. You can store your data as-is, without having to first structure it.`,
-        howToUse: 'Implement using cloud services like AWS S3, Azure Data Lake Storage, or Google Cloud Storage. Use tools like Apache Spark or Presto to analyze the data.',
-        whenToUse: 'When you need to store vast amounts of raw data for future processing, when schema-on-read is required, or when dealing with diverse data types.',
-        examples: [
-          'Storing IoT sensor data in raw format',
-          'Keeping social media logs for sentiment analysis',
-          'Archiving clickstream data for user behavior analysis'
-        ]
+      'data lake': {
+        explanation: "A Data Lake is a centralized repository that stores all your structured and unstructured data at any scale.",
+        howToUse: "Use AWS S3, Azure Data Lake, or Google Cloud Storage. Organize with folders and metadata tags.",
+        whenToUse: "When storing raw data for future analysis, or when schema-on-read flexibility is needed.",
+        examples: ["Storing IoT sensor data", "Archiving social media feeds", "Keeping clickstream logs"]
+      },
+      'spark': {
+        explanation: "Apache Spark is a unified analytics engine for large-scale data processing with built-in modules for SQL, streaming, and machine learning.",
+        howToUse: "Write code in Python (PySpark), Scala, or R. Use DataFrames API for structured data.",
+        whenToUse: "When processing terabytes of data, performing complex transformations, or real-time streaming.",
+        examples: ["Processing log files", "Running ML algorithms", "Streaming analytics"]
+      },
+      'sql': {
+        explanation: "Structured Query Language is used to communicate with databases, allowing you to query, insert, update, and delete data.",
+        howToUse: "Write SELECT statements with JOINs, WHERE clauses, and GROUP BY aggregations.",
+        whenToUse: "Whenever working with relational databases or structured data stores.",
+        examples: ["Customer data analysis", "Sales reporting", "Inventory management"]
       }
-      // Add more terms as needed
-    };
-  }
-
-  async explainTerm(term) {
-    // Check if term exists in mock database
-    const lowerTerm = term.toLowerCase();
-    const termKey = Object.keys(this.mockTermsDatabase).find(key => 
-      key.toLowerCase().includes(lowerTerm) || lowerTerm.includes(key.toLowerCase())
-    );
-    
-    if (termKey) {
-      return {
-        explanation: this.mockTermsDatabase[termKey].explanation,
-        examples: this.mockTermsDatabase[termKey].examples,
-        howToUse: this.mockTermsDatabase[termKey].howToUse,
-        whenToUse: this.mockTermsDatabase[termKey].whenToUse,
-        relatedTerms: ['Data Warehouse', 'Data Pipeline', 'Big Data']
-      };
-    }
-    
-    // Mock response for unknown terms
-    return {
-      explanation: `${term} is a data engineering concept that involves...`,
-      examples: [`Example 1 of using ${term}`, `Another practical use of ${term}`],
-      howToUse: `Use ${term} when you need to...`,
-      whenToUse: `Apply ${term} in situations where...`,
-      relatedTerms: ['Related Concept 1', 'Related Concept 2']
-    };
-  }
-
-  async generateQuiz(topic = 'general') {
-    const quizzes = {
-      etl: [
-        {
-          question: 'What does ETL stand for?',
-          options: [
-            'Extract, Transform, Load',
-            'Extract, Transfer, Load',
-            'Export, Transform, Load',
-            'Extract, Translate, Load'
-          ],
-          correct: 0,
-          explanation: 'ETL stands for Extract, Transform, Load - the three phases of the process.'
-        },
-        {
-          question: 'Which tool is NOT typically used for ETL?',
-          options: ['Apache Airflow', 'Talend', 'MySQL', 'Informatica'],
-          correct: 2,
-          explanation: 'MySQL is a database system, not an ETL tool.'
-        }
-      ],
-      general: [
-        {
-          question: 'What is a Data Lake?',
-          options: [
-            'A repository for raw, unprocessed data',
-            'A structured database for analytics',
-            'A tool for data visualization',
-            'A type of data warehouse'
-          ],
-          correct: 0,
-          explanation: 'A Data Lake stores raw data in its native format until needed.'
-        },
-        {
-          question: 'Which is a characteristic of a Data Warehouse?',
-          options: [
-            'Schema-on-write',
-            'Schema-on-read',
-            'Stores only unstructured data',
-            'Real-time processing only'
-          ],
-          correct: 0,
-          explanation: 'Data Warehouses use schema-on-write for structured analytics.'
-        }
-      ]
-    };
-    
-    return {
-      topic,
-      questions: quizzes[topic] || quizzes.general,
-      duration: '10 minutes',
-      totalQuestions: (quizzes[topic] || quizzes.general).length
     };
   }
 
   async askQuestion(question) {
-    // Simulate AI response with delay
     return new Promise((resolve) => {
       setTimeout(() => {
-        const responses = [
-          `Based on data engineering best practices: ${question} involves...`,
-          `In data engineering, ${question} typically refers to...`,
-          `The standard approach for ${question} is to...`,
-          `${question} is commonly used when...`
-        ];
+        const lowerQuestion = question.toLowerCase();
+        let answer = '';
+        let matchedTerm = null;
+        
+        // Find matching term
+        for (const [term, data] of Object.entries(this.termDatabase)) {
+          if (lowerQuestion.includes(term)) {
+            matchedTerm = data;
+            answer = `📚 **${term.toUpperCase()}**: ${data.explanation}\n\n`;
+            answer += `🔧 **How to use**: ${data.howToUse}\n\n`;
+            answer += `⏰ **When to use**: ${data.whenToUse}\n\n`;
+            answer += `📋 **Examples**:\n`;
+            data.examples.forEach((ex, i) => {
+              answer += `  ${i+1}. ${ex}\n`;
+            });
+            break;
+          }
+        }
+        
+        if (!matchedTerm) {
+          answer = `I don't have specific information about "${question}" yet. Try asking about:\n`;
+          answer += `- ETL (Extract, Transform, Load)\n`;
+          answer += `- Data Lake\n`;
+          answer += `- Apache Spark\n`;
+          answer += `- SQL\n`;
+          answer += `- Data Warehouse\n`;
+          answer += `- Big Data\n`;
+        }
+        
         resolve({
-          answer: responses[Math.floor(Math.random() * responses.length)],
-          sources: ['Data Engineering Book', 'AWS Documentation', 'Medium Article'],
-          confidence: Math.random() * 50 + 50 // 50-100%
+          answer: answer,
+          confidence: matchedTerm ? 95 : 50,
+          timestamp: new Date().toLocaleTimeString()
         });
-      }, 1000);
+      }, 500);
     });
+  }
+
+  async generateQuiz(topic = 'general') {
+    const quizzes = {
+      'etl': [
+        {
+          question: "What does ETL stand for?",
+          options: ["Extract, Transform, Load", "Extract, Transfer, Load", "Export, Transform, Link", "Execute, Transfer, Load"],
+          correct: 0,
+          explanation: "ETL stands for Extract, Transform, Load - the three phases of data integration."
+        },
+        {
+          question: "Which tool is commonly used for ETL?",
+          options: ["Apache Airflow", "Microsoft Word", "Photoshop", "Slack"],
+          correct: 0,
+          explanation: "Apache Airflow is a popular workflow orchestration tool for ETL pipelines."
+        },
+        {
+          question: "What's the first step in ETL?",
+          options: ["Extract", "Transform", "Load", "Delete"],
+          correct: 0,
+          explanation: "Extraction is the first step, where data is pulled from source systems."
+        }
+      ],
+      'data lake': [
+        {
+          question: "What is a Data Lake?",
+          options: [
+            "A repository for raw, unprocessed data",
+            "A swimming pool filled with data",
+            "A type of database",
+            "A visualization tool"
+          ],
+          correct: 0,
+          explanation: "A Data Lake stores raw data in its native format until needed."
+        },
+        {
+          question: "Which cloud service is used for Data Lakes?",
+          options: ["AWS S3", "EC2", "Lambda", "Route 53"],
+          correct: 0,
+          explanation: "Amazon S3 is commonly used as a Data Lake storage solution."
+        }
+      ],
+      'general': [
+        {
+          question: "What is a primary key in databases?",
+          options: [
+            "A unique identifier for each row",
+            "A password for the database",
+            "The first column in a table",
+            "A type of index"
+          ],
+          correct: 0,
+          explanation: "A primary key uniquely identifies each record in a table."
+        },
+        {
+          question: "What does SQL stand for?",
+          options: [
+            "Structured Query Language",
+            "Simple Question Language",
+            "Standard Query Logic",
+            "System Query Language"
+          ],
+          correct: 0,
+          explanation: "SQL is the standard language for relational database management."
+        }
+      ]
+    };
+
+    const normalizedTopic = topic.toLowerCase();
+    const quizQuestions = quizzes[normalizedTopic] || quizzes.general;
+    
+    return {
+      topic: topic,
+      questions: quizQuestions,
+      totalQuestions: quizQuestions.length,
+      difficulty: normalizedTopic === 'general' ? 'Beginner' : 'Intermediate'
+    };
   }
 }
 
