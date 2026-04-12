@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/bright-de-ai-assistant/static/css/main.7847b4ab.css",
-    "main.js": "/bright-de-ai-assistant/static/js/main.dd05b1b2.js",
+    "main.css": "/bright-de-ai-assistant/static/css/main.3d5551e4.css",
+    "main.js": "/bright-de-ai-assistant/static/js/main.9bb6510e.js",
     "index.html": "/bright-de-ai-assistant/index.html",
-    "main.7847b4ab.css.map": "/bright-de-ai-assistant/static/css/main.7847b4ab.css.map",
-    "main.dd05b1b2.js.map": "/bright-de-ai-assistant/static/js/main.dd05b1b2.js.map"
+    "main.3d5551e4.css.map": "/bright-de-ai-assistant/static/css/main.3d5551e4.css.map",
+    "main.9bb6510e.js.map": "/bright-de-ai-assistant/static/js/main.9bb6510e.js.map"
   },
   "entrypoints": [
-    "static/css/main.7847b4ab.css",
-    "static/js/main.dd05b1b2.js"
+    "static/css/main.3d5551e4.css",
+    "static/js/main.9bb6510e.js"
   ]
 }
