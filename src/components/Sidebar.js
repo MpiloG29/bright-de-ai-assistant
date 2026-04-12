@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import aiService from '../services/aiService';
 import storageService from '../services/storageService';
 import '../styles/components.css';
+
+const NAV_LINKS = [
+  { to: '/', icon: '🏠', label: 'Dashboard' },
+  { to: '/terms', icon: '📚', label: 'Terms Library' },
+  { to: '/courses', icon: '🎓', label: 'Courses' },
+  { to: '/videos', icon: '📹', label: 'Video Tutorials' },
+  { to: '/progress', icon: '📊', label: 'Progress & Ranks' },
+  { to: '/scenarios', icon: '🧪', label: 'Interactive Labs' },
+  { to: '/concept-map', icon: '🗺️', label: 'Concept Map' },
+  { to: '/case-studies', icon: '📋', label: 'Case Studies' },
+  { to: '/playground', icon: '💻', label: 'Code Playground' },
+  { to: '/career', icon: '🚀', label: 'Career Tracker' },
+  { to: '/community', icon: '🤝', label: 'Community' },
+];
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -16,13 +30,15 @@ const Sidebar = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizScore, setQuizScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [navCollapsed, setNavCollapsed] = useState(false);
+  const recognitionRef = useRef(null);
 
   const handleAskAI = async () => {
     if (!aiQuestion.trim()) {
       alert('Please enter a question!');
       return;
     }
-    
     setIsLoading(true);
     try {
       const response = await aiService.askQuestion(aiQuestion);
@@ -35,9 +51,35 @@ const Sidebar = () => {
     }
   };
 
-  const handleStartQuiz = async () => {
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice input is not supported in your browser. Try Chrome or Edge.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setAiQuestion(prev => prev ? `${prev} ${transcript}` : transcript);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setShowAIChat(true);
+  };
+
+  const handleStartQuiz = async (topic) => {
     try {
-      const quiz = await aiService.generateQuiz(quizTopic);
+      const quiz = await aiService.generateQuiz(topic || quizTopic);
       setCurrentQuiz(quiz);
       setCurrentQuestionIndex(0);
       setQuizScore(0);
@@ -51,34 +93,24 @@ const Sidebar = () => {
 
   const handleAnswerQuestion = (selectedOptionIndex) => {
     if (!currentQuiz) return;
-    
     const currentQuestion = currentQuiz.questions[currentQuestionIndex];
     const isCorrect = selectedOptionIndex === currentQuestion.correct;
-    
-    if (isCorrect) {
-      setQuizScore(prev => prev + 1);
-    }
-    
-    // Show result for this question
+    if (isCorrect) setQuizScore(prev => prev + 1);
+
     alert(`${isCorrect ? '✅ Correct!' : '❌ Incorrect!'}\n${currentQuestion.explanation}`);
-    
-    // Move to next question or finish
+
     if (currentQuestionIndex + 1 < currentQuiz.questions.length) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
-      // Quiz completed
       const finalScore = quizScore + (isCorrect ? 1 : 0);
       const percentage = Math.round((finalScore / currentQuiz.questions.length) * 100);
-      
       storageService.saveQuizResult({
         name: `${quizTopic.toUpperCase()} Quiz`,
         score: percentage,
         totalQuestions: currentQuiz.questions.length,
         correctAnswers: finalScore
       });
-      
       setShowResult(true);
-      alert(`🎉 Quiz completed!\nYour score: ${finalScore}/${currentQuiz.questions.length} (${percentage}%)`);
     }
   };
 
@@ -94,71 +126,66 @@ const Sidebar = () => {
     }
   };
 
+  const stats = storageService.getStatistics();
+
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
         <h2>DE Assistant</h2>
         <p>Learn Data Engineering</p>
+        <button className="collapse-nav-btn" onClick={() => setNavCollapsed(!navCollapsed)}>
+          {navCollapsed ? '▼ Show nav' : '▲ Hide nav'}
+        </button>
       </div>
-      
-      <nav>
-        <ul className="nav-links">
-          <li>
-            <NavLink to="/" className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
-              <span className="nav-icon">🏠</span>
-              <span>Dashboard</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/terms" className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
-              <span className="nav-icon">📚</span>
-              <span>Terms Library</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/courses" className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
-              <span className="nav-icon">🎓</span>
-              <span>Courses</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/videos" className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
-              <span className="nav-icon">📹</span>
-              <span>Video Tutorials</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/progress" className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
-              <span className="nav-icon">📊</span>
-              <span>Progress Tracker</span>
-            </NavLink>
-          </li>
-        </ul>
-      </nav>
-      
+
+      {!navCollapsed && (
+        <nav>
+          <ul className="nav-links">
+            {NAV_LINKS.map(({ to, icon, label }) => (
+              <li key={to}>
+                <NavLink to={to} end={to === '/'} className={({ isActive }) => isActive ? 'active rainbow' : 'rainbow'}>
+                  <span className="nav-icon">{icon}</span>
+                  <span>{label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       <div className="quick-actions rainbow-gradient">
         <h4>⚡ Quick Actions</h4>
-        
-        <button 
-          className="quick-action-btn ai-btn"
-          onClick={() => setShowAIChat(!showAIChat)}
-        >
+
+        <button className="quick-action-btn ai-btn" onClick={() => setShowAIChat(!showAIChat)}>
           🤖 Ask AI Assistant
         </button>
-        
+
+        <button
+          className={`quick-action-btn voice-btn ${isListening ? 'listening' : ''}`}
+          onClick={handleVoiceInput}
+        >
+          {isListening ? '🔴 Listening...' : '🎤 Voice Search'}
+        </button>
+
         {showAIChat && (
           <div className="ai-chat-box">
-            <textarea
-              placeholder="Ask anything about data engineering..."
-              value={aiQuestion}
-              onChange={(e) => setAiQuestion(e.target.value)}
-              rows="3"
-            />
-            <button 
-              onClick={handleAskAI}
-              disabled={isLoading}
-              className="ask-btn"
-            >
+            <div className="ai-input-row">
+              <textarea
+                placeholder="Ask anything about data engineering..."
+                value={aiQuestion}
+                onChange={(e) => setAiQuestion(e.target.value)}
+                rows="3"
+                onKeyDown={(e) => { if (e.key === 'Enter' && e.ctrlKey) handleAskAI(); }}
+              />
+              <button
+                className={`voice-inline-btn ${isListening ? 'listening' : ''}`}
+                onClick={handleVoiceInput}
+                title="Voice input"
+              >
+                🎤
+              </button>
+            </div>
+            <button onClick={handleAskAI} disabled={isLoading} className="ask-btn">
               {isLoading ? 'Thinking...' : 'Ask AI'}
             </button>
             {aiResponse && (
@@ -169,48 +196,53 @@ const Sidebar = () => {
             )}
           </div>
         )}
-        
-        <button 
-          className="quick-action-btn quiz-btn"
-          onClick={() => setShowQuizModal(true)}
-        >
+
+        <button className="quick-action-btn quiz-btn" onClick={() => setShowQuizModal(true)}>
           📝 Take a Quiz
         </button>
-        
-        <button 
-          className="quick-action-btn bookmark-btn"
-          onClick={handleReviewBookmarks}
-        >
+
+        <button className="quick-action-btn bookmark-btn" onClick={handleReviewBookmarks}>
           🔖 Review Bookmarks
         </button>
       </div>
-      
+
       <div className="sidebar-stats rainbow-light">
         <div className="stat-item">
           <span className="stat-label">Today's Streak</span>
-          <span className="stat-value">{storageService.getStreak() || 0} days 🔥</span>
+          <span className="stat-value">{stats.currentStreak || 0} days 🔥</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Terms Mastered</span>
-          <span className="stat-value">{storageService.getStatistics().totalTermsMastered || 0}</span>
+          <span className="stat-value">{stats.totalTermsMastered || 0}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Total XP</span>
+          <span className="stat-value">⭐ {(stats.totalTermsMastered * 20 + stats.totalQuizzesTaken * 40 + stats.totalCoursesEnrolled * 50 + stats.totalVideosWatched * 10)}</span>
         </div>
       </div>
 
-      {/* Quiz Modal */}
+      {/* Quiz Modal — Topic Select */}
       {showQuizModal && !currentQuiz && (
         <div className="modal-overlay">
           <div className="modal-content rainbow-gradient">
             <h3>📝 Select Quiz Topic</h3>
             <div className="quiz-topics">
-              <button onClick={() => { setQuizTopic('general'); handleStartQuiz(); }} className="topic-btn">General</button>
-              <button onClick={() => { setQuizTopic('etl'); handleStartQuiz(); }} className="topic-btn">ETL</button>
-              <button onClick={() => { setQuizTopic('data lake'); handleStartQuiz(); }} className="topic-btn">Data Lake</button>
+              {['general', 'etl', 'data lake', 'sql', 'spark'].map(topic => (
+                <button
+                  key={topic}
+                  onClick={() => { setQuizTopic(topic); handleStartQuiz(topic); }}
+                  className="topic-btn"
+                >
+                  {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                </button>
+              ))}
             </div>
             <button className="close-btn" onClick={() => setShowQuizModal(false)}>Close</button>
           </div>
         </div>
       )}
 
+      {/* Quiz Modal — Question */}
       {showQuizModal && currentQuiz && !showResult && (
         <div className="modal-overlay">
           <div className="modal-content rainbow-gradient">
@@ -223,11 +255,7 @@ const Sidebar = () => {
             </div>
             <div className="quiz-options">
               {currentQuiz.questions[currentQuestionIndex].options.map((option, idx) => (
-                <button
-                  key={idx}
-                  className="option-btn"
-                  onClick={() => handleAnswerQuestion(idx)}
-                >
+                <button key={idx} className="option-btn" onClick={() => handleAnswerQuestion(idx)}>
                   {option}
                 </button>
               ))}
@@ -237,6 +265,7 @@ const Sidebar = () => {
         </div>
       )}
 
+      {/* Quiz Modal — Result */}
       {showQuizModal && showResult && (
         <div className="modal-overlay">
           <div className="modal-content rainbow-gradient">
@@ -244,21 +273,14 @@ const Sidebar = () => {
             <div className="quiz-result">
               <p>Your Score: {quizScore}/{currentQuiz?.questions.length}</p>
               <p>Percentage: {Math.round((quizScore / (currentQuiz?.questions.length || 1)) * 100)}%</p>
+              <p>XP Earned: +{Math.round((quizScore / (currentQuiz?.questions.length || 1)) * 40)} ⭐</p>
             </div>
-            <button 
-              className="restart-btn"
-              onClick={() => {
-                setCurrentQuiz(null);
-                setShowResult(false);
-              }}
-            >
+            <button className="restart-btn" onClick={() => { setCurrentQuiz(null); setShowResult(false); }}>
               Try Another Quiz
             </button>
-            <button className="close-btn" onClick={() => {
-              setShowQuizModal(false);
-              setCurrentQuiz(null);
-              setShowResult(false);
-            }}>Close</button>
+            <button className="close-btn" onClick={() => { setShowQuizModal(false); setCurrentQuiz(null); setShowResult(false); }}>
+              Close
+            </button>
           </div>
         </div>
       )}

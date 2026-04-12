@@ -1,39 +1,62 @@
 :root {
-  /* Rainbow Colors */
-  --rainbow-red: #ff6b6b;
-  --rainbow-orange: #ff9e6d;
-  --rainbow-yellow: #ffd93d;
-  --rainbow-green: #6bcf7f;
-  --rainbow-blue: #4d96ff;
-  --rainbow-indigo: #6c5ce7;
-  --rainbow-violet: #a367dc;
-  --rainbow-pink: #ff8b8b;
-  
+  /* ── Orange & Purple Theme ── */
+  --primary-orange:    #f97316;   /* vibrant orange */
+  --primary-deep:      #ea580c;   /* deeper orange for hover */
+  --secondary-purple:  #7c3aed;   /* vibrant purple */
+  --secondary-light:   #a855f7;   /* lighter purple */
+
+  /* Aliases so existing code stays intact */
+  --primary-blue:      #f97316;   /* was blue → now orange */
+  --accent-green:      #10b981;
+  --accent-orange:     #f97316;
+  --bright-yellow:     #fbbf24;
+  --accent-teal:       #06b6d4;
+
+  /* Backgrounds */
+  --light-bg:          #fff7f0;   /* warm off-white */
+  --card-bg:           #ffffff;
+  --dark-text:         #1e293b;
+  --medium-text:       #475569;
+  --muted-text:        #94a3b8;
+
+  /* Shadows */
+  --shadow:            0 4px 20px rgba(249, 115, 22, 0.12);
+  --shadow-lg:         0 10px 40px rgba(124, 58, 237, 0.15);
+
   /* Gradients */
-  --gradient-rainbow: linear-gradient(135deg, 
-    #ff6b6b 0%, 
-    #ff9e6d 15%, 
-    #ffd93d 30%, 
-    #6bcf7f 45%, 
-    #4d96ff 60%, 
-    #6c5ce7 75%, 
-    #a367dc 90%);
-  
-  --gradient-sunset: linear-gradient(135deg, #ff6b6b 0%, #ff9e6d 100%);
-  --gradient-ocean: linear-gradient(135deg, #4d96ff 0%, #6c5ce7 100%);
-  --gradient-forest: linear-gradient(135deg, #6bcf7f 0%, #4d96ff 100%);
-  --gradient-lavender: linear-gradient(135deg, #a367dc 0%, #6c5ce7 100%);
-  
-  /* UI Colors */
-  --bg-light: linear-gradient(135deg, #fff9f0 0%, #fff0f0 100%);
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --text-dark: #2d3436;
-  --text-light: #636e72;
-  --shadow: 0 10px 30px rgba(255, 107, 107, 0.15);
-  --shadow-rainbow: 0 10px 30px rgba(255, 107, 107, 0.2);
+  --gradient-primary:  linear-gradient(135deg, #f97316 0%, #7c3aed 100%);
+  --gradient-orange:   linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  --gradient-purple:   linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  --gradient-warm:     linear-gradient(135deg, #fff7f0 0%, #fdf4ff 100%);
+
+  /* Legacy rainbow vars (kept for existing classes) */
+  --rainbow-red:    #ff6b6b;
+  --rainbow-orange: #f97316;
+  --rainbow-yellow: #fbbf24;
+  --rainbow-green:  #10b981;
+  --rainbow-blue:   #7c3aed;
+  --rainbow-indigo: #6d28d9;
+  --rainbow-violet: #a855f7;
+  --rainbow-pink:   #f472b6;
+
+  --gradient-rainbow: linear-gradient(135deg,
+    #f97316 0%,
+    #fb923c 20%,
+    #fbbf24 40%,
+    #a855f7 60%,
+    #7c3aed 80%,
+    #6d28d9 100%);
+
+  --gradient-sunset:   linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --gradient-ocean:    linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  --gradient-forest:   linear-gradient(135deg, #10b981 0%, #7c3aed 100%);
+  --gradient-lavender: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+
+  --bg-light:          linear-gradient(135deg, #fff7f0 0%, #fdf4ff 100%);
+  --shadow-rainbow:    0 10px 30px rgba(249, 115, 22, 0.18);
 }
 
-/* Rainbow Text Effects */
+/* ── Rainbow / Theme Text ── */
 .rainbow-text {
   background: var(--gradient-rainbow);
   -webkit-background-clip: text;
@@ -42,13 +65,15 @@
   font-weight: bold;
 }
 
-.rainbow-bg {
-  background: var(--bg-light);
-}
+.rainbow-bg { background: var(--bg-light); }
 
 .rainbow-gradient {
-  background: var(--gradient-rainbow);
+  background: var(--gradient-primary);
   color: white;
+}
+
+.rainbow-light {
+  background: linear-gradient(135deg, #fff7f0, #fdf4ff);
 }
 
 .rainbow-card {
@@ -61,19 +86,19 @@
 
 .rainbow-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.22);
 }
 
-/* Rainbow Button Variants */
-.rainbow-btn-1 { background: var(--rainbow-red); }
-.rainbow-btn-2 { background: var(--rainbow-orange); }
-.rainbow-btn-3 { background: var(--rainbow-yellow); color: black; }
-.rainbow-btn-4 { background: var(--rainbow-green); }
-.rainbow-btn-5 { background: var(--rainbow-blue); }
-.rainbow-btn-6 { background: var(--rainbow-indigo); }
-.rainbow-btn-7 { background: var(--rainbow-violet); }
+/* ── Button Variants ── */
+.rainbow-btn-1 { background: var(--primary-orange); color: white; }
+.rainbow-btn-2 { background: #fb923c;               color: white; }
+.rainbow-btn-3 { background: var(--bright-yellow);  color: #1e293b; }
+.rainbow-btn-4 { background: var(--accent-green);   color: white; }
+.rainbow-btn-5 { background: var(--secondary-light);color: white; }
+.rainbow-btn-6 { background: var(--secondary-purple);color: white; }
+.rainbow-btn-7 { background: #6d28d9;               color: white; }
 
-/* Rainbow Borders */
+/* ── Rainbow Border ── */
 .rainbow-border {
   border: 3px solid transparent;
   border-image: var(--gradient-rainbow);

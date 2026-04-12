@@ -2257,7 +2257,7 @@ body {
    ============================================ */
 
 .rainbow-btn {
-  background: linear-gradient(135deg, #ff6b6b, #ff9e6d, #ffd93d, #6bcf7f, #4d96ff, #6c5ce7, #a367dc);
+  background: linear-gradient(135deg, #ff6b6b, #ff9e6d, #ffd93d, #6bcf7f, #4d96ff, #7c3aed, #a367dc);
   color: white;
   border: none;
   padding: 12px 24px;
